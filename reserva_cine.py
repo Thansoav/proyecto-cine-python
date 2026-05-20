@@ -113,15 +113,40 @@ def eliminar_cliente():
     
     nombre_cliente = clientes[rut]['nombre']
     
-    # Eliminar al cliente del diccionario de clientes
+    # Eliminar al cliente del diccionario de clientes [cite: 29]
     del clientes[rut]
     
-    # REGLA: Al eliminar un cliente, también se debe eliminar cualquier reserva asociada a ese RUT
+    # REGLA: Al eliminar un cliente, también se debe eliminar cualquier reserva asociada a ese RUT [cite: 30]
     if rut in reservas:
         del reservas[rut]
         print(f"[AVISO] Se eliminaron las reservas asociadas al RUT {rut}.")
         
     print(f"\n[ÉXITO] El cliente {nombre_cliente} ha sido eliminado del sistema.")
+
+def imprimir_sala():
+    print("\n" + "-" * 15 + " Sala de Cine " + "-" * 15)
+    
+    # Recorremos cada fila de nuestra matriz de la sala [cite: 52]
+    for fila in sala_cine:
+        linea_asientos = ""
+        
+        for asiento in fila:
+            # Revisamos si este número de asiento está en las reservas de algún cliente
+            asiento_ocupado = False
+            for asientos_cliente in reservas.values():
+                if asiento in asientos_cliente:
+                    asiento_ocupado = True
+                    break
+            
+            # Si está ocupado imprimimos [XX], si no, su número [cite: 55, 57]
+            if asiento_ocupado:
+                linea_asientos += " [XX]"
+            else:
+                linea_asientos += f" [{format(asiento, '02d')}]"
+                
+        print(linea_asientos)
+        
+    print("\n XX = Asiento reservado")
 def menu_principal():
     while True:
         print("\n" + "="*36)
@@ -158,7 +183,7 @@ def menu_principal():
         elif opcion == "8":
             print("\n--- Próximamente: Listar reservas ---")
         elif opcion == "9":
-            print("\n--- Próximamente: Imprimir sala ---")
+            imprimir_sala()
         elif opcion == "10":
             print("\n¡Gracias por utilizar el sistema! Saliendo...")
             break
