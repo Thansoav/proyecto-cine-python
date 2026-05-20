@@ -147,6 +147,70 @@ def imprimir_sala():
         print(linea_asientos)
         
     print("\n XX = Asiento reservado")
+def reservar_asientos():
+    print("\n--- RESERVAR ASIENTOS ---")
+    rut = input("Ingrese el RUT del cliente que realiza la reserva: ").strip()
+    
+    # Regla: El cliente debe estar previamente registrado
+    if rut not in clientes:
+        print("[ERROR] El cliente no está registrado en el sistema. Debe crearlo primero.")
+        return
+        
+    # Regla: El cliente debe estar vigente
+    if clientes[rut]["vigencia"] == "N":
+        print("[ERROR] El cliente no está vigente. No puede realizar reservas.")
+        return
+
+    # Mostrar la sala para que el cliente vea qué asientos están libres
+    imprimir_sala()
+    
+    # Solicitar cuántos asientos desea reservar
+    try:
+        cantidad = int(input("\n¿Cuántos asientos desea reservar?: "))
+        if cantidad <= 0:
+            print("[ERROR] La cantidad debe ser mayor a 0.")
+            return
+    except ValueError:
+        print("[ERROR] Debe ingresar un número entero válido.")
+        return
+
+    nuevos_asientos = []
+    
+    # Iterar para pedir cada asiento
+    for i in range(cantidad):
+        try:
+            asiento = int(input(f"Ingrese el número del asiento {i+1} (1-40): "))
+            
+            # Regla: El asiento seleccionado debe existir
+            if asiento < 1 or asiento > 40:
+                print(f"[ERROR] El asiento {asiento} no existe en la sala. Reserva cancelada.")
+                return
+                
+            # Regla: El asiento no debe estar reservado por otro cliente (ni por él mismo en este proceso)
+            asiento_ocupado = False
+            for asientos_cliente in reservas.values():
+                if asiento in asientos_cliente:
+                    asiento_ocupado = True
+                    break
+            
+            if asiento_ocupado or (asiento in nuevos_asientos):
+                print(f"[ERROR] El asiento {asiento} ya está reservado u ocupado en esta selección. Reserva cancelada.")
+                return
+                
+            nuevos_asientos.append(asiento)
+            
+        except ValueError:
+            print("[ERROR] Entrada inválida. Debe ingresar números de asiento. Reserva cancelada.")
+            return
+
+    # Regla: Guardar la reserva asociada al RUT del cliente
+    # Si el cliente ya tenía asientos reservados, se los sumamos; si no, creamos la lista
+    if rut in reservas:
+        reservas[rut].extend(nuevos_asientos)
+    else:
+        reservas[rut] = nuevos_asientos
+
+    print(f"\n[ÉXITO] Se han reservado los asientos {nuevos_asientos} para el cliente {clientes[rut]['nombre']}.")
 def menu_principal():
     while True:
         print("\n" + "="*36)
@@ -175,7 +239,7 @@ def menu_principal():
         elif opcion == "4":
             eliminar_cliente()
         elif opcion == "5":
-            print("\n--- Próximamente: Reservar asientos ---")
+            reservar_asientos()
         elif opcion == "6":
             print("\n--- Próximamente: Modificar reserva ---")
         elif opcion == "7":
