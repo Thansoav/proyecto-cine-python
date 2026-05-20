@@ -1,0 +1,170 @@
+# ==============================================================================
+# ESTRUCTURAS DE DATOS GLOBALES
+# ==============================================================================
+
+# Clientes se guardarán como: { "12345678-9": {"nombre": "Juan", "tel": "91234...", "mail": "...", "vigencia": "S"} }
+clientes = {}
+
+# Reservas se guardarán como: { "12345678-9": [asiento1, asiento2, ...] }
+reservas = {}
+
+# Sala de cine: Matriz de 5x8 (Lista de listas con números del 1 al 40)
+sala_cine = [
+    [1, 2, 3, 4, 5, 6, 7, 8],
+    [9, 10, 11, 12, 13, 14, 15, 16],
+    [17, 18, 19, 20, 21, 22, 23, 24],
+    [25, 26, 27, 28, 29, 30, 31, 32],
+    [33, 34, 35, 36, 37, 38, 39, 40]
+]
+
+# ==============================================================================
+# MENÚ PRINCIPAL Y FLUJO
+# ==============================================================================
+# ==============================================================================
+# GESTIÓN DE CLIENTES (CRUD)
+# ==============================================================================
+
+def crear_cliente():
+    print("\n--- CREAR NUEVO CLIENTE ---")
+    rut = input("Ingrese RUT (con guión y dígito verificador, ej: 12345678-9): ").strip()
+    
+    # Regla: No se debe permitir registrar dos clientes con el mismo RUT
+    if rut in clientes:
+        print("[ERROR] Ya existe un cliente registrado con ese RUT.")
+        return
+
+    nombre = input("Ingrese Nombre completo: ").strip()
+    telefono = input("Ingrese Teléfono: ").strip()
+    mail = input("Ingrese E-mail: ").strip()
+    
+    # Validación de vigencia (S o N)
+    while True:
+        vigencia = input("¿Cliente vigente? (S/N): ").strip().upper()
+        if vigencia in ["S", "N"]:
+            break
+        print("[ERROR] Por favor, ingrese solo 'S' para Sí o 'N' para No.")
+
+    # Guardar en nuestro diccionario global
+    clientes[rut] = {
+        "nombre": nombre,
+        "telefono": telefono,
+        "mail": mail,
+        "vigencia": vigencia
+    }
+    print(f"\n[ÉXITO] Cliente {nombre} registrado correctamente.")
+
+
+def listar_clientes():
+    print("\n--- LISTA DE CLIENTES REGISTRADOS ---")
+    
+    # Si el diccionario está vacío
+    if not clientes:
+        print("No hay clientes registrados en el sistema.")
+        return
+    
+    # Mostrar datos principales de cada cliente
+    for rut, datos in clientes.items():
+        print(f"RUT: {rut} | Nombre: {datos['nombre']} | Teléfono: {datos['telefono']} | Mail: {datos['mail']} | Vigente: {datos['vigencia']}")
+def modificar_cliente():
+    print("\n--- MODIFICAR DATOS DE CLIENTE ---")
+    rut = input("Ingrese el RUT del cliente que desea modificar: ").strip()
+    
+    # Verificar si el cliente existe
+    if rut not in clientes:
+        print("[ERROR] El cliente con ese RUT no está registrado.")
+        return
+    
+    print(f"\nModificando al cliente: {clientes[rut]['nombre']}")
+    print("(Deje en blanco y presione Enter si no desea cambiar el campo)")
+    
+    nuevo_nombre = input(f"Nuevo Nombre [{clientes[rut]['nombre']}]: ").strip()
+    nuevo_tel = input(f"Nuevo Teléfono [{clientes[rut]['telefono']}]: ").strip()
+    nuevo_mail = input(f"Nuevo E-mail [{clientes[rut]['mail']}]: ").strip()
+    
+    # Si ingresó datos, los actualizamos; si no, se quedan los anteriores
+    if nuevo_nombre:
+        clientes[rut]['nombre'] = nuevo_nombre
+    if nuevo_tel:
+        clientes[rut]['telefono'] = nuevo_tel
+    if nuevo_mail:
+        clientes[rut]['mail'] = nuevo_mail
+        
+    # Modificar vigencia con validación
+    while True:
+        nueva_vigencia = input(f"¿Nueva Vigencia? S/N [{clientes[rut]['vigencia']}]: ").strip().upper()
+        if not nueva_vigencia:  # Si presiona enter sin escribir nada
+            break
+        if nueva_vigencia in ["S", "N"]:
+            clientes[rut]['vigencia'] = nueva_vigencia
+            break
+        print("[ERROR] Ingrese 'S' para Sí o 'N' para No.")
+        
+    print(f"\n[ÉXITO] Datos de cliente con RUT {rut} actualizados.")
+
+
+def eliminar_cliente():
+    print("\n--- ELIMINAR CLIENTE ---")
+    rut = input("Ingrese el RUT del cliente que desea eliminar: ").strip()
+    
+    # Verificar si el cliente existe
+    if rut not in clientes:
+        print("[ERROR] El cliente con ese RUT no está registrado.")
+        return
+    
+    nombre_cliente = clientes[rut]['nombre']
+    
+    # Eliminar al cliente del diccionario de clientes
+    del clientes[rut]
+    
+    # REGLA: Al eliminar un cliente, también se debe eliminar cualquier reserva asociada a ese RUT
+    if rut in reservas:
+        del reservas[rut]
+        print(f"[AVISO] Se eliminaron las reservas asociadas al RUT {rut}.")
+        
+    print(f"\n[ÉXITO] El cliente {nombre_cliente} ha sido eliminado del sistema.")
+def menu_principal():
+    while True:
+        print("\n" + "="*36)
+        print("   SISTEMA DE RESERVA DE CINE  ")
+        print("="*36)
+        print("1. Crear cliente")
+        print("2. Listar clientes")
+        print("3. Modificar cliente")
+        print("4. Eliminar cliente")
+        print("5. Reservar asientos")
+        print("6. Modificar reserva")
+        print("7. Eliminar reserva")
+        print("8. Listar reservas")
+        print("9. Imprimir sala")
+        print("10. Salir")
+        print("="*36)
+        
+        opcion = input("Seleccione una opción (1-10): ").strip()
+        
+        if opcion == "1":
+            crear_cliente()
+        elif opcion == "2":
+            listar_clientes()
+        elif opcion == "3":
+            modificar_cliente()
+        elif opcion == "4":
+            eliminar_cliente()
+        elif opcion == "5":
+            print("\n--- Próximamente: Reservar asientos ---")
+        elif opcion == "6":
+            print("\n--- Próximamente: Modificar reserva ---")
+        elif opcion == "7":
+            print("\n--- Próximamente: Eliminar reserva ---")
+        elif opcion == "8":
+            print("\n--- Próximamente: Listar reservas ---")
+        elif opcion == "9":
+            print("\n--- Próximamente: Imprimir sala ---")
+        elif opcion == "10":
+            print("\n¡Gracias por utilizar el sistema! Saliendo...")
+            break
+        else:
+            print("\n[ERROR] Opción no válida. Intente nuevamente.")
+
+# Iniciar el programa
+if __name__ == "__main__":
+    menu_principal()
