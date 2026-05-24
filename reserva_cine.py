@@ -211,6 +211,92 @@ def reservar_asientos():
         reservas[rut] = nuevos_asientos
 
     print(f"\n[ÉXITO] Se han reservado los asientos {nuevos_asientos} para el cliente {clientes[rut]['nombre']}.")
+def modificar_reserva():
+    print("\n--- MODIFICAR RESERVA ---")
+    rut = input("Ingrese el RUT del cliente para modificar su reserva: ").strip()
+    
+    # Regla: Verificar si el cliente tiene una reserva registrada
+    if rut not in reservas:
+        print("[ERROR] No se encontraron reservas asociadas a este RUT.")
+        return
+        
+    print(f"\nCliente: {clientes[rut]['nombre']}")
+    print(f"Reserva actual: Asientos {reservas[rut]}")
+    
+    # Mostrar la sala actual para referencia
+    imprimir_sala()
+    
+    print("\nAl modificar, ingresará una nueva lista de asientos desde cero.")
+    print("Si desea conservar alguno de sus asientos anteriores, debe volver a ingresarlo.")
+    
+    try:
+        cantidad = int(input("¿Cuántos asientos tendrá su nueva reserva?: "))
+        if cantidad <= 0:
+            print("[ERROR] La cantidad debe ser mayor a 0.")
+            return
+    except ValueError:
+        print("[ERROR] Debe ingresar un número entero válido.")
+        return
+
+    nuevos_asientos = []
+    
+    for i in range(cantidad):
+        try:
+            asiento = int(input(f"Ingrese el número del asiento {i+1} (1-40): "))
+            
+            # Regla: El asiento debe existir
+            if asiento < 1 or asiento > 40:
+                print(f"[ERROR] El asiento {asiento} no existe. Proceso cancelado.")
+                return
+                
+            # Regla: No se pueden ocupar asientos de OTROS clientes.
+            # Pero SÍ puede incluir asientos que ya eran de él (según el enunciado).
+            asiento_ocupado_por_otro = False
+            for otro_rut, asientos_cliente in reservas.items():
+                if otro_rut != rut and asiento in asientos_cliente:
+                    asiento_ocupado_por_otro = True
+                    break
+                    
+            if asiento_ocupado_por_otro or (asiento in nuevos_asientos):
+                print(f"[ERROR] El asiento {asiento} está ocupado por otro cliente o ya lo seleccionó. Proceso cancelado.")
+                return
+                
+            nuevos_asientos.append(asiento)
+            
+        except ValueError:
+            print("[ERROR] Entrada inválida. Proceso cancelado.")
+            return
+
+    # Actualizar la lista de asientos del cliente
+    reservas[rut] = nuevos_asientos
+    print(f"\n[ÉXITO] Reserva modificada. Nuevos asientos del cliente: {reservas[rut]}")
+
+
+def eliminar_reserva():
+    print("\n--- ELIMINAR RESERVA ---")
+    rut = input("Ingrese el RUT del cliente para eliminar su reserva: ").strip()
+    
+    # Regla: Verificar si existe la reserva
+    if rut not in reservas:
+        print("[ERROR] No existe ninguna reserva asociada a ese RUT.")
+        return
+        
+    # Eliminar la reserva del diccionario (los asientos vuelven a quedar libres automáticamente)
+    del reservas[rut]
+    print(f"\n[ÉXITO] La reserva ha sido eliminada. Los asientos vuelven a estar disponibles.")
+
+
+def listar_reservas():
+    print("\n--- LISTA DE RESERVAS EXISTENTES ---")
+    
+    if not reservas:
+        print("No hay reservas registradas en el sistema.")
+        return
+        
+    # Regla: Mostrar todas las reservas indicando RUT, Nombre del cliente y Asientos
+    for rut, asientos in reservas.items():
+        nombre_cliente = clientes[rut]['nombre']
+        print(f"RUT: {rut} | Cliente: {nombre_cliente} | Asientos Reservados: {asientos}")
 def menu_principal():
     while True:
         print("\n" + "="*36)
@@ -241,11 +327,11 @@ def menu_principal():
         elif opcion == "5":
             reservar_asientos()
         elif opcion == "6":
-            print("\n--- Próximamente: Modificar reserva ---")
+            modificar_reserva()
         elif opcion == "7":
-            print("\n--- Próximamente: Eliminar reserva ---")
+            eliminar_reserva()
         elif opcion == "8":
-            print("\n--- Próximamente: Listar reservas ---")
+           listar_reservas()
         elif opcion == "9":
             imprimir_sala()
         elif opcion == "10":
